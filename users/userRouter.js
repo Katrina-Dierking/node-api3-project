@@ -57,7 +57,7 @@ router.get('/:id/posts', validateUserId, (req, res) => {
     });
   });
 
-
+});
 //-----------------------//
 
 router.delete('/:id', validateUserId, (req, res) => {
@@ -179,8 +179,7 @@ function validatePost(req, res, next) {
   } else {
     req.text = post;
     next();
-  }
+  };
+
 };
-
 module.exports = router;
-
