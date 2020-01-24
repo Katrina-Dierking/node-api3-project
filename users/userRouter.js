@@ -7,9 +7,9 @@ const router = express.Router();
 
 
 router.post('/', validateUser, (req, res) => {
-  const { userName } = req.body;
+  const { name } = req.body;
 
-  db.insert({ name: userName })
+  db.insert( name )
     .then(user => {
       res.status(200).json(user);
     })
@@ -87,30 +87,24 @@ router.delete('/:id', validateUserId, (req, res) => {
 //-----------------------//
 router.put('/:id', (req, res) => {
 
-  db.update(req.user.id, { name: req.body.name })
+  db.update(req.params.id, req.body)
   .then(() => {
-    db.getById(req.user.id)
+    db.getById(req.params.id)
       .then(user => {
         res.status(200).json(user);
       })
-      .catch(error => {
-        res.status(500).json({
-          success: false, 
-          errorMessage: "Could not retrieve updated user", error
-         });
-      });
   })
   .catch(error => {
     res.status(500).json({
       success: false, 
-      errorMessage: "Could retrieve update user", error 
+      errorMessage: "Could not retrieve update user", error 
     });
   });
 });
 
 //-----------------------//
 router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
-  posts.insert({ user_id: req.params.id, text: req.body.text })
+  posts.insert (req.params.id, req.body.text )
   .then(post => {
     res.status(200).json({ 
       message: post 
