@@ -7,7 +7,7 @@ const router = express.Router();
 
 
 router.post('/', validateUser, (req, res) => {
-  const { name } = req.body;
+  const name  = req.body;
 
   db.insert( name )
     .then(user => {
@@ -49,12 +49,6 @@ router.get('/:id/posts', validateUserId, (req, res) => {
     if (posts.length > 0) {
       res.status(200).json(posts);
     }
-    else {
-      res.status(400).json({
-        success: false, 
-        errorMessage: "No posts available" 
-      });
-    }
   })
   .catch(error => {
     res.status(500).json({ 
@@ -62,7 +56,7 @@ router.get('/:id/posts', validateUserId, (req, res) => {
       errorMessage: "No posts retrieved", error
     });
   });
-});
+
 
 //-----------------------//
 
@@ -104,14 +98,16 @@ router.put('/:id', (req, res) => {
 
 //-----------------------//
 router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
-  posts.insert (req.params.id, req.body.text )
+  posts.insert ({user_id: req.params.id, text: req.body.text})
   .then(post => {
     res.status(200).json({ 
+      success: true,
       message: post 
     });
   })
   .catch(error => {
     res.status(500).json({ 
+      success: false, 
       errorMessage: "Could not post", error
      });
   });
@@ -149,43 +145,42 @@ function validateUserId(req, res, next) {
 
 function validateUser(req, res, next) {
 
-  if (req.body) {
-    if (req.body.name) {
-      next();
-    }
-    else {
-      res.status(400).json({ 
-        errorMessage: "Missing name" 
-      })
-    }
-  } else {
-    res.status(400).json({ 
-      errorMessage: "Missing user data" 
+  const text = req.body.name;
+
+  if (!req.body.name) {
+    return res.status(404).json({ 
+      success: false,
+      errorMessage: "missing user data" 
     });
+
+  } else {
+    req.user = text;
+    next();
   };
 };
+
 
 //-----------------------//
 //ValidatePost//
 //-----------------------//
 
 function validatePost(req, res, next) {
-  if (req.body) {
-    if (req.body.text) {
-      next();
-    } else {
-      res.status(400).json({ 
-        errorMessage: "Missing required text field" 
-      });
-    }
-  } else {
-    res.status(400).json({ 
-      errorMessage: "Missing post data" 
+  const post = (
+    req.body.text,
+    req.params.id
+  );
+
+  if (!req.body.text) {
+    return res.status(404).json({ 
+      success: false,
+      errorMessage: "missing post data" 
     });
-  };
+
+  } else {
+    req.text = post;
+    next();
+  }
 };
-
-
 
 module.exports = router;
 
